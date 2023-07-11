@@ -1,0 +1,37 @@
+version: "3.7"
+
+services:
+  app:
+    image: multivende-api-gateway:v1
+    container_name: multivende-api-gateway
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    env_file: .env
+    ports:
+      - 3000:3000
+    depends_on:
+      - mongodb
+    restart: always
+    networks:
+      - multivende-integration-nw
+
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    restart: always
+    environment:
+      - MONGO_DATA_DIR=/data/db
+      - MONGO_LOG_DIR=/dev/null
+    volumes:
+      - mongodb:/data/db
+    expose:
+      - 27017
+    networks:
+      - multivende-integration-nw
+
+volumes:
+  mongodb:
+
+networks:
+  multivende-integration-nw:
