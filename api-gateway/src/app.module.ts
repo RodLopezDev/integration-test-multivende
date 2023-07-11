@@ -1,23 +1,16 @@
-import { Logger, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigService, ConfigModule } from '@nestjs/config';
+
+import { getEnvironmentVars } from './app/Environment';
+
+import { ConfigurationModule } from './modules/configuration/configuration.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [
-        () => {
-          Logger.log(`PORT: ${process.env.PORT}`);
-          Logger.log(`MONGO_URI: ${process.env.MONGO_URI}`);
-          return {
-            port: parseInt(process.env.PORT) || 4000,
-            database: {
-              uri: process.env.MONGO_URI,
-            },
-          };
-        },
-      ],
+      load: [getEnvironmentVars],
     }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
@@ -26,6 +19,7 @@ import { ConfigService, ConfigModule } from '@nestjs/config';
         uri: config.get<string>('database.uri'),
       }),
     }),
+    ConfigurationModule,
   ],
   controllers: [],
   providers: [],
