@@ -12,6 +12,4 @@ RUN npm run build
 
 RUN npm install -g serve
 
-RUN cd dist
-
-CMD ["serve", "-p", "4000"]
+CMD ["serve", "dist", "-p", "4000"]

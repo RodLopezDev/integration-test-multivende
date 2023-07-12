@@ -1,7 +1,22 @@
 version: "3.7"
 
 services:
-  app:
+  frontend:
+    image: multivende-frontend:v1
+    container_name: multivende-frontend
+    build:
+      context: ./integration-app
+      dockerfile: Dockerfile
+    env_file: .env
+    ports:
+      - 4000:4000
+    depends_on:
+      - backend
+    restart: always
+    networks:
+      - multivende-integration-nw
+
+  backend:
     image: multivende-api-gateway:v1
     container_name: multivende-api-gateway
     build:

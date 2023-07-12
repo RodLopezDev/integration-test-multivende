@@ -1,8 +1,9 @@
 import { ApiTags } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
-import { Get, Controller, Query } from '@nestjs/common';
+import { Get, Controller, Query, Res } from '@nestjs/common';
 
 import { IntegrationService } from '../integration/integration.service';
+import { Response } from 'express';
 
 @ApiTags('Configuration')
 @Controller('configuration')
@@ -13,15 +14,16 @@ export class ConfigurationController {
   ) {}
 
   @Get()
-  async findAll(@Query('code') code: string) {
+  async findAll(@Query('code') code: string, @Res() res: Response) {
+    const callbackUrl = this.configService.get<string>('callbackUrl');
     const integrations = await this.integrationService.findAll();
     if (!integrations) {
-      return false;
+      return res.redirect(callbackUrl);
     }
     const integration = integrations?.[0];
 
-    const result = await this.integrationService.updateCode(integration, code);
+    await this.integrationService.updateCode(integration, code);
 
-    return result;
+    return res.redirect(callbackUrl);
   }
 }
