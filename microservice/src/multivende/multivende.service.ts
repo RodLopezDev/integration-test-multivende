@@ -30,13 +30,17 @@ export class MultivendeService {
         },
       },
     );
-    return data;
+    if (!data?.entries?.[0]) {
+      return null;
+    }
+    return data?.entries?.[0];
   }
 
-  async getPrices(token: string, merchantId: string, page = 1) {
+  async bulkUpdate(token: string, warehouseId: string, products: any[]) {
     const baseUrl = this.configService.get<string>('multivende.url');
-    const { data } = await axios.get(
-      `${baseUrl}/api/m/${merchantId}/product-price-lists/p/${page}`,
+    const { data } = await axios.post(
+      `${baseUrl}/api/product-stocks/stores-and-warehouses/${warehouseId}/bulk-set`,
+      products,
       {
         headers: {
           Authorization: `bearer ${token}`,

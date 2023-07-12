@@ -1,15 +1,15 @@
 import { Module } from '@nestjs/common';
+import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 
-import { AppService } from './app.service';
 import { AppController } from './app.controller';
 import { getEnvironmentVars } from './app/Environment';
 
+import { BulkModule } from './bulk/bulk.module';
+import { AppAsyncController } from './app.async.controller';
 import { MultivendeModule } from './multivende/multivende.module';
 import { KAFKA_CONSUMER_GROUP_ID, KAFKA_INSTANCE_NAME } from './app/Constants';
-import { MongooseModule } from '@nestjs/mongoose';
-import { BulkModule } from './bulk/bulk.module';
 
 @Module({
   imports: [
@@ -48,7 +48,7 @@ import { BulkModule } from './bulk/bulk.module';
     MultivendeModule,
     BulkModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController, AppAsyncController],
+  providers: [],
 })
 export class AppModule {}

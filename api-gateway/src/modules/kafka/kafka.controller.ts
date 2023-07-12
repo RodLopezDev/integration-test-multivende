@@ -1,9 +1,11 @@
 import {
-  Controller,
-  Inject,
-  InternalServerErrorException,
-  Logger,
+  Get,
   Post,
+  Param,
+  Inject,
+  Logger,
+  Controller,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { ClientKafka } from '@nestjs/microservices';
 import { ApiTags } from '@nestjs/swagger';
@@ -15,9 +17,11 @@ import {
   KAFKA_WAREHOUSE_TOPIC,
   KAFKA_BULK_INIT_TOPIC,
   KAFKA_BULK_STATUS_TOPIC,
+  KAFKA_BULK_STATUS_TOPIC_ID,
 } from '../../app/Constants';
 import { IntegrationService } from '../integration/integration.service';
 import { Integration } from '../integration/entities/integration.entity';
+import { ParseMongoIdPipe } from '../common/parse-mongo-id.pipe';
 
 @ApiTags('Kafka')
 @Controller()
@@ -29,21 +33,16 @@ export class KafkaController {
   ) {}
 
   async onModuleInit() {
-    try {
-      [
-        KAFKA_INFO_TOPIC,
-        KAFKA_WAREHOUSE_TOPIC,
-        KAFKA_BULK_INIT_TOPIC,
-        KAFKA_BULK_STATUS_TOPIC,
-      ].forEach((topic) => {
-        this.client.subscribeToResponseOf(topic);
-      });
-      await this.client.connect();
-      Logger.log('CONNECTED');
-    } catch (e) {
-      Logger.error('ERROR');
-      Logger.error(e);
-    }
+    [
+      KAFKA_INFO_TOPIC,
+      KAFKA_WAREHOUSE_TOPIC,
+      KAFKA_BULK_INIT_TOPIC,
+      KAFKA_BULK_STATUS_TOPIC,
+      KAFKA_BULK_STATUS_TOPIC_ID,
+    ].forEach((topic) => {
+      this.client.subscribeToResponseOf(topic);
+    });
+    await this.client.connect();
   }
 
   async onModuleDestroy() {
@@ -82,7 +81,7 @@ export class KafkaController {
     });
   }
 
-  @Post('bulk-init')
+  @Get('bulk-init')
   async buklUpdate() {
     const integration = await this._getIntegration();
     return new Observable((observer) => {
@@ -92,10 +91,17 @@ export class KafkaController {
     });
   }
 
-  @Post('bulk-state')
+  @Get('bulk-state')
   async buklState() {
     return new Observable((observer) => {
       this.client.send(KAFKA_BULK_STATUS_TOPIC, {}).subscribe(observer);
+    });
+  }
+
+  @Get('bulk-state/:bulkId')
+  async buklStateById(@Param('bulkId', ParseMongoIdPipe) bulkId: string) {
+    return new Observable((observer) => {
+      this.client.send(KAFKA_BULK_STATUS_TOPIC_ID, bulkId).subscribe(observer);
     });
   }
 }

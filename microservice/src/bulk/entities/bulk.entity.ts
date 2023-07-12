@@ -7,7 +7,28 @@ export class Bulk extends Document {
   state: string;
 
   @Prop()
-  data: string[];
+  warehouseId: string;
+
+  @Prop()
+  current: number;
+
+  @Prop()
+  total: number;
+
+  @Prop()
+  hasError: boolean;
+
+  @Prop()
+  errorType: string;
+
+  @Prop()
+  retries: number;
+
+  @Prop()
+  createAt: Date;
+
+  @Prop()
+  updatedAt: Date;
 }
 
 export const BulkSchema = SchemaFactory.createForClass(Bulk);

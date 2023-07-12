@@ -1,32 +1,27 @@
 import {
-  BadRequestException,
-  Controller,
   Inject,
   Logger,
+  Controller,
+  BadRequestException,
 } from '@nestjs/common';
-import {
-  ClientKafka,
-  EventPattern,
-  MessagePattern,
-  Payload,
-} from '@nestjs/microservices';
+import { ClientKafka, MessagePattern, Payload } from '@nestjs/microservices';
 
 import {
   KAFKA_INFO_TOPIC,
+  TOTAL_BULK_UPDATE,
+  OFFSET_BULK_UPDATE,
+  KAFKA_INSTANCE_NAME,
   KAFKA_BULK_INIT_TOPIC,
   KAFKA_WAREHOUSE_TOPIC,
   KAFKA_BULK_STATUS_TOPIC,
   KAFKA_INTERN_TOPIC_BULK_NODE,
-  KAFKA_INSTANCE_NAME,
-  OFFSET_BULK_UPDATE,
-  TOTAL_BULK_UPDATE,
+  KAFKA_BULK_STATUS_TOPIC_ID,
 } from './app/Constants';
 
-import { IntegrationDto } from './dto/IntegrationDto';
-import { MultivendeService } from './multivende/multivende.service';
 import { BulkService } from './bulk/bulk.service';
 import { BulkRunningDto } from './dto/BulkRunningDto';
-import { BulkStates } from './app/BulkProcess';
+import { IntegrationDto } from './dto/IntegrationDto';
+import { MultivendeService } from './multivende/multivende.service';
 
 @Controller()
 export class AppController {
@@ -54,7 +49,6 @@ export class AppController {
     try {
       return await this.multivendeService.getInfo(clientToken);
     } catch (e) {
-      Logger.log(e);
       return { status: 'ERROR', message: e?.message };
     }
   }
@@ -69,31 +63,8 @@ export class AppController {
         merchant.MerchantId,
       );
     } catch (e) {
-      Logger.log(e);
       return { status: 'ERROR', message: e?.message };
     }
-  }
-
-  @MessagePattern(KAFKA_BULK_INIT_TOPIC)
-  async bulkTransaction(@Payload() message: IntegrationDto): Promise<any> {
-    const clientToken = this.getToken(message);
-    const bulk = await this.bulkService.findActive();
-    if (bulk) {
-      return { state: 'BULK_RUNNING_AGAIN', data: bulk.toJSON() };
-    }
-
-    const bulkCreated = await this.bulkService.create('CREATED');
-
-    // TODO: ADD LOGIC BUSSINESS
-
-    const dto: BulkRunningDto = {
-      index: 0,
-      offset: OFFSET_BULK_UPDATE,
-      total: TOTAL_BULK_UPDATE,
-      token: clientToken,
-    };
-    this.client.emit(KAFKA_INTERN_TOPIC_BULK_NODE, dto);
-    return { state: 'CREATED', data: bulkCreated.toJSON() };
   }
 
   @MessagePattern(KAFKA_BULK_STATUS_TOPIC)
@@ -105,39 +76,45 @@ export class AppController {
     return { state: 'NOT_FOUND_ACTIVE_BULK', data: null };
   }
 
-  @EventPattern(KAFKA_INTERN_TOPIC_BULK_NODE)
-  async bulkRunnerTransaction(@Payload() dto: BulkRunningDto): Promise<any> {
-    const { index, offset, total, token } = dto;
+  @MessagePattern(KAFKA_BULK_STATUS_TOPIC_ID)
+  async bulkStateTransactionId(@Payload() bulkId: string): Promise<any> {
+    const bulk = await this.bulkService.findById(bulkId);
+    if (bulk) {
+      return { state: 'ACTIVE', data: bulk.toJSON() };
+    }
+    return { state: 'NOT_FOUND_ACTIVE_BULK', data: null };
+  }
+
+  @MessagePattern(KAFKA_BULK_INIT_TOPIC)
+  async bulkTransaction(@Payload() message: IntegrationDto): Promise<any> {
+    const clientToken = this.getToken(message);
     const bulk = await this.bulkService.findActive();
-    if (!bulk) {
-      return { state: 'NOT_FOUND_ACTIVE_BULK', data: null };
+    if (bulk) {
+      return { state: 'BULK_RUNNING_AGAIN', data: bulk.toJSON() };
     }
 
-    const isLastIteration = Number(index) + Number(offset) >= Number(total);
+    const merchant = await this.multivendeService.getInfo(clientToken);
+    const warehouse = await this.multivendeService.getWarehouse(
+      clientToken,
+      merchant.MerchantId,
+    );
+    if (!warehouse) {
+      return { state: 'WAREHOUSE_NOT_FOUND', data: null };
+    }
 
-    // TODO: ADD LOGIC BUSSINESS
-    const data: string[] = new Array(offset).fill('example');
-
-    await this.bulkService.update(
-      bulk,
-      isLastIteration ? BulkStates.FINISHED : BulkStates.PROCESSING,
-      [...bulk.data, ...data],
+    const bulkCreated = await this.bulkService.create(
+      'CREATED',
+      warehouse?._id,
+      TOTAL_BULK_UPDATE,
     );
 
-    if (isLastIteration) {
-      return;
-    }
+    const bulkId = String(bulkCreated.id);
 
-    Logger.log(`KAFKA_INTERN_TOPIC_BULK_NODE-index: ${index}`);
-    Logger.log(`KAFKA_INTERN_TOPIC_BULK_NODE-offset: ${offset}`);
-    Logger.log(`KAFKA_INTERN_TOPIC_BULK_NODE-total: ${total}`);
-
-    const dtoToSend: BulkRunningDto = {
-      index: index + offset,
-      offset,
-      total,
-      token,
+    const dto: BulkRunningDto = {
+      bulkId,
+      token: clientToken,
     };
-    this.client.emit(KAFKA_INTERN_TOPIC_BULK_NODE, dtoToSend);
+    this.client.emit(KAFKA_INTERN_TOPIC_BULK_NODE, dto);
+    return { state: 'CREATED', data: bulkCreated.toJSON() };
   }
 }
