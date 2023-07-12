@@ -5,8 +5,8 @@ export const getEnvironmentVars = () => {
   Logger.log(`KAFKA_HOST: ${process.env.KAFKA_HOST}`);
   return {
     kafka: {
-      port: parseInt(process.env.KAFKA_HOST) || 4000,
-      host: parseInt(process.env.KAFKA_HOST) || 4000,
+      host: String(process.env.KAFKA_HOST) || '',
+      port: parseInt(process.env.KAFKA_PORT) || 4000,
     },
   };
 };
