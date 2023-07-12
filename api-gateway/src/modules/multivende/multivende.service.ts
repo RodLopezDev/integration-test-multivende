@@ -8,15 +8,37 @@ export class MultivendeService {
 
   async getInfo(token: string) {
     const baseUrl = this.configService.get<string>('multivende.url');
-    try {
-      const { data } = await axios.get(`${baseUrl}/api/d/info`, {
+    const { data } = await axios.get(`${baseUrl}/api/d/info`, {
+      headers: {
+        Authorization: `bearer ${token}`,
+      },
+    });
+    return data;
+  }
+
+  async getWarehouse(token: string, merchantId: string, page = 1) {
+    const baseUrl = this.configService.get<string>('multivende.url');
+    const { data } = await axios.get(
+      `${baseUrl}/api/m/${merchantId}/stores-and-warehouses/p/${page}`,
+      {
         headers: {
           Authorization: `bearer ${token}`,
         },
-      });
-      return data;
-    } catch (e) {
-      throw new Error('REQUEST_ERROR');
-    }
+      },
+    );
+    return data;
+  }
+
+  async getPrices(token: string, merchantId: string, page = 1) {
+    const baseUrl = this.configService.get<string>('multivende.url');
+    const { data } = await axios.get(
+      `${baseUrl}/api/m/${merchantId}/product-price-lists/p/${page}`,
+      {
+        headers: {
+          Authorization: `bearer ${token}`,
+        },
+      },
+    );
+    return data;
   }
 }

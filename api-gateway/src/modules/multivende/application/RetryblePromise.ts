@@ -6,19 +6,17 @@ export class RetryablePromiseEvent {
   constructor(private readonly controller: MultivendeController) {}
 
   async run<T>(promise: (token: string) => Promise<T>) {
-    const promiseRefresh = this.controller.refresh;
-
     const token = await this.controller.getToken();
 
-    async function concurrencyFunction<T>(
+    const concurrencyFunction = async <T>(
       _token: string,
       promise: (token: string) => Promise<T>,
       isRetry = false,
-    ) {
+    ) => {
       if (isRetry) {
-        console.log('RUNNING 2 TIME');
-        const newToken = await promiseRefresh();
+        const newToken = await this.controller.refresh();
         _token = newToken.clientToken;
+        console.log('RUNNING 2 TIME');
       } else {
         console.log('RUNNING 1 TIME');
       }
@@ -36,9 +34,10 @@ export class RetryablePromiseEvent {
             concurrencyFunction(_token, promise, true);
           }
         }
+        console.error(e?.message);
         throw new InternalServerErrorException('ERROR_RUNNING_AUTH_SERVICE');
       }
-    }
+    };
 
     return concurrencyFunction(token.clientToken, promise);
   }

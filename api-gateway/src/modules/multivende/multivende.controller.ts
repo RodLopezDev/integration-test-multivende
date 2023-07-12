@@ -14,15 +14,11 @@ import { MultivendeService } from './multivende.service';
 @ApiTags('Multivende')
 @Controller('multivende')
 export class MultivendeController {
-  runnable: RetryablePromiseEvent;
-
   constructor(
     private readonly multivendeAuthService: MultivendeAuthService,
     private readonly multivendeService: MultivendeService,
     private readonly integrationService: IntegrationService,
-  ) {
-    this.runnable = new RetryablePromiseEvent(this);
-  }
+  ) {}
 
   async getToken() {
     const integrations = await this.integrationService.findAll();
@@ -87,9 +83,36 @@ export class MultivendeController {
 
   @Post('info')
   async getInfo() {
-    const result = await this.runnable.run<string>((token) => {
+    const runnable = new RetryablePromiseEvent(this);
+    const result = await runnable.run<string>((token) => {
       return this.multivendeService.getInfo(token);
     });
     return result;
+  }
+
+  @Post('warehouse')
+  async getWarehouse() {
+    const runnable = new RetryablePromiseEvent(this);
+    const merchanInfo = await runnable.run<any>((token) => {
+      return this.multivendeService.getInfo(token);
+    });
+    const warehouseInfo = await runnable.run<string>((token) =>
+      this.multivendeService.getWarehouse(token, merchanInfo.MerchantId),
+    );
+    return warehouseInfo;
+  }
+
+  @Post('prices')
+  async getPrices() {
+    const runnable = new RetryablePromiseEvent(this);
+    const merchanInfo = await runnable.run<any>((token) => {
+      console.log(token, 'merchanInfo');
+      return this.multivendeService.getInfo(token);
+    });
+    const pricesInfo = await runnable.run<string>((token) => {
+      console.log(token, 'pricesInfo');
+      return this.multivendeService.getPrices(token, merchanInfo.MerchantId);
+    });
+    return pricesInfo;
   }
 }
