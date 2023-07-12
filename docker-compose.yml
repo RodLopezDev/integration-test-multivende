@@ -1,35 +1,49 @@
 version: "3.7"
 
 services:
-  frontend:
-    image: multivende-frontend:v1
-    container_name: multivende-frontend
-    build:
-      context: ./integration-app
-      dockerfile: Dockerfile
-    env_file: .env
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
     ports:
-      - 4000:4000
-    depends_on:
-      - backend
-    restart: always
+      - 22181:2181
     networks:
-      - multivende-integration-nw
+      - multivende-kafka-nw
 
-  backend:
-    image: multivende-api-gateway:v1
-    container_name: multivende-api-gateway
-    build:
-      context: ./api-gateway
-      dockerfile: Dockerfile
-    env_file: .env
-    ports:
-      - 3000:3000
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka
     depends_on:
-      - mongodb
-    restart: always
+      - zookeeper
+    ports:
+      - 29092:29092
+    environment:
+      #KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,KAFKA://0.0.0.0:29092
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     networks:
-      - multivende-integration-nw
+      - multivende-kafka-nw
+      - multivende-microservices-nw
+
+  kafka_ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka_ui
+    depends_on:
+      - kafka
+    ports:
+      - 8080:8080
+    environment:
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+    networks:
+      - multivende-kafka-nw
 
   mongodb:
     image: mongo:latest
@@ -43,28 +57,57 @@ services:
     expose:
       - 27017
     networks:
-      - multivende-integration-nw
+      - multivende-db-nw
 
-  kafka:
-    image: confluentinc/cp-enterprise-kafka:5.5.3
-    depends_on: []
-    hostname: 'kafka-internal.io'
-    environment:
-      #KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
-      KAFKA_ADVERTISED_HOST_NAME: kafka-internal.io
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-internal.io:29092,PLAINTEXT_HOST://kafka-internal.io:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_BROKER_ID: 1
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_JMX_PORT: 9991
+  backend:
+    image: multivende-api-gateway:v1
+    container_name: multivende-api-gateway
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    env_file: .env
     ports:
-      - 9092:9092
+      - 3000:3000
+    depends_on:
+      - mongodb
+      - kafka
+    restart: always
     networks:
-      - ms_yape
+      - multivende-microservices-nw
+      - multivende-db-nw
+
+  microservice:
+    image: multivende-microservice:v1
+    container_name: multivende-microservice
+    build:
+      context: ./microservice
+      dockerfile: Dockerfile
+    env_file: .env
+    depends_on:
+      - mongodb
+      - kafka
+    restart: always
+    networks:
+      - multivende-microservices-nw
+      - multivende-db-nw
+
+  frontend:
+    image: multivende-frontend:v1
+    container_name: multivende-frontend
+    build:
+      context: ./integration-app
+      dockerfile: Dockerfile
+    env_file: .env
+    ports:
+      - 4000:4000
+    depends_on:
+      - backend
+    restart: always
 
 volumes:
   mongodb:
 
 networks:
-  multivende-integration-nw:
+  multivende-db-nw:
+  multivende-kafka-nw:
+  multivende-microservices-nw:
