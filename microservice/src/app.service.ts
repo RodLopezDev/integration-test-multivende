@@ -1,7 +1,7 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ClientKafka } from '@nestjs/microservices';
 
-import { KAFKA_INSTANCE_NAME, KAFKA_RESPONSE_TOPIC } from './app/Constants';
+import { KAFKA_INSTANCE_NAME } from './app/Constants';
 import { TransactionRequestDto } from './dto/TransactionRequestDto';
 import { TransactionResponseDto } from './dto/TransactionResponseDto';
 
