@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateIntegrationDto } from './dto/create-integration.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Integration } from './entities/integration.entity';
@@ -24,15 +28,52 @@ export class IntegrationService {
     return await this.integrationModel.find({});
   }
 
-  // findOne(id: number) {
-  //   return `This action returns a #${id} integration`;
-  // }
+  async findById(id: string) {
+    const integration = await this.integrationModel.findById(id);
+    if (!integration) {
+      return null;
+    }
+    throw new NotFoundException(`Not found integration`);
+  }
 
-  // update(id: number, updateIntegrationDto: UpdateIntegrationDto) {
-  //   return `This action updates a #${id} integration`;
-  // }
+  async updateCode(dto: Integration, clientCode: string) {
+    const integration = await this.findById(dto.id);
+    try {
+      const newIntegration = await integration.updateOne(
+        { ...dto.toJSON(), clientCode },
+        {
+          new: true,
+        },
+      );
+      if (!!newIntegration.matchedCount) {
+        return dto.toJSON();
+      }
+      return null;
+    } catch (e) {
+      throw new InternalServerErrorException(e?.message);
+    }
+  }
 
-  // remove(id: number) {
-  //   return `This action removes a #${id} integration`;
-  // }
+  async updateTokens(dto: Integration, token: string, refreshToken: string) {
+    const integration = await this.findById(dto.id);
+    try {
+      const newIntegration = await integration.updateOne(
+        { ...dto.toJSON(), token, refreshToken },
+        {
+          new: true,
+        },
+      );
+      if (!!newIntegration.matchedCount) {
+        return dto.toJSON();
+      }
+      return null;
+    } catch (e) {
+      throw new InternalServerErrorException(e?.message);
+    }
+  }
+
+  async remove() {
+    const result = await this.integrationModel.deleteMany({});
+    return result.deletedCount > 0;
+  }
 }
