@@ -26,6 +26,7 @@ import { IntegrationDto } from './dto/IntegrationDto';
 import { MultivendeService } from './multivende/multivende.service';
 import { BulkService } from './bulk/bulk.service';
 import { BulkRunningDto } from './dto/BulkRunningDto';
+import { BulkStates } from './app/BulkProcess';
 
 @Controller()
 export class AppController {
@@ -76,53 +77,50 @@ export class AppController {
   @MessagePattern(KAFKA_BULK_INIT_TOPIC)
   async bulkTransaction(@Payload() message: IntegrationDto): Promise<any> {
     const clientToken = this.getToken(message);
-    const bulks = await this.bulkService.findAll();
-    if (!!bulks.length) {
-      const bulk = bulks?.[0];
-      if (bulk.state !== 'FINISHED') {
-        return { state: 'BULK_RUNNING_AGAIN', data: bulks?.[0] };
-      }
+    const bulk = await this.bulkService.findActive();
+    if (bulk) {
+      return { state: 'BULK_RUNNING_AGAIN', data: bulk.toJSON() };
     }
 
-    const bulk = await this.bulkService.create('CREATED');
+    const bulkCreated = await this.bulkService.create('CREATED');
+
     // TODO: ADD LOGIC BUSSINESS
 
     const dto: BulkRunningDto = {
       index: 0,
       offset: OFFSET_BULK_UPDATE,
       total: TOTAL_BULK_UPDATE,
+      token: clientToken,
     };
     this.client.emit(KAFKA_INTERN_TOPIC_BULK_NODE, dto);
-    return bulk;
+    return { state: 'CREATED', data: bulkCreated.toJSON() };
   }
 
   @MessagePattern(KAFKA_BULK_STATUS_TOPIC)
   async bulkStateTransaction(): Promise<any> {
-    const bulks = await this.bulkService.findAll();
-    if (!bulks.length) {
-      return { state: 'NONE' };
+    const bulk = await this.bulkService.findActive();
+    if (bulk) {
+      return { state: 'ACTIVE', data: bulk.toJSON() };
     }
-    const bulk = bulks?.[0];
-    return bulk.toJSON();
+    return { state: 'NOT_FOUND_ACTIVE_BULK', data: null };
   }
 
   @EventPattern(KAFKA_INTERN_TOPIC_BULK_NODE)
   async bulkRunnerTransaction(@Payload() dto: BulkRunningDto): Promise<any> {
-    const bulks = await this.bulkService.findAll();
-    if (!bulks.length) {
-      return { state: 'NONE' };
+    const { index, offset, total, token } = dto;
+    const bulk = await this.bulkService.findActive();
+    if (!bulk) {
+      return { state: 'NOT_FOUND_ACTIVE_BULK', data: null };
     }
-    const bulk = bulks?.[0];
-    const { index, offset, total } = dto;
 
-    const data: string[] = new Array(offset).fill('example');
     const isLastIteration = Number(index) + Number(offset) >= Number(total);
 
     // TODO: ADD LOGIC BUSSINESS
+    const data: string[] = new Array(offset).fill('example');
 
     await this.bulkService.update(
       bulk,
-      isLastIteration ? 'FINISHED' : 'PROCESSING',
+      isLastIteration ? BulkStates.FINISHED : BulkStates.PROCESSING,
       [...bulk.data, ...data],
     );
 
@@ -134,7 +132,12 @@ export class AppController {
     Logger.log(`KAFKA_INTERN_TOPIC_BULK_NODE-offset: ${offset}`);
     Logger.log(`KAFKA_INTERN_TOPIC_BULK_NODE-total: ${total}`);
 
-    const dtoToSend: BulkRunningDto = { index: index + offset, offset, total };
+    const dtoToSend: BulkRunningDto = {
+      index: index + offset,
+      offset,
+      total,
+      token,
+    };
     this.client.emit(KAFKA_INTERN_TOPIC_BULK_NODE, dtoToSend);
   }
 }

@@ -9,4 +9,4 @@ export const KAFKA_INSTANCE_NAME = 'example-name';
 export const KAFKA_CONSUMER_GROUP_ID = 'microservice-consumer';
 
 export const OFFSET_BULK_UPDATE = 5;
-export const TOTAL_BULK_UPDATE = 10000;
+export const TOTAL_BULK_UPDATE = 20000;

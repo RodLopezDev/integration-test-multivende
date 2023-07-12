@@ -1,0 +1,6 @@
+export const BulkStates = {
+  CREATED: 'CREATED',
+  PROCESSING: 'PROCESSING',
+  RETRYING: 'RETRYING',
+  FINISHED: 'FINISHED',
+};

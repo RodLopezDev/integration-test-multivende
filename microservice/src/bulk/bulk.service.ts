@@ -7,6 +7,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 
 import { Bulk } from './entities/bulk.entity';
+import { BulkStates } from '../app/BulkProcess';
 
 @Injectable()
 export class BulkService {
@@ -21,6 +22,20 @@ export class BulkService {
 
   async findAll() {
     return await this.bulkModel.find({});
+  }
+
+  async findActive(): Promise<Bulk | null> {
+    const bulks = await this.bulkModel.find({
+      $or: [
+        { state: BulkStates.CREATED },
+        { state: BulkStates.PROCESSING },
+        { state: BulkStates.RETRYING },
+      ],
+    });
+    if (!bulks.length) {
+      return null;
+    }
+    return bulks?.[0];
   }
 
   async findById(id: string) {
