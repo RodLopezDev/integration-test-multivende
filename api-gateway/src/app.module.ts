@@ -5,6 +5,8 @@ import { ConfigService, ConfigModule } from '@nestjs/config';
 import { getEnvironmentVars } from './app/Environment';
 
 import { ConfigurationModule } from './modules/configuration/configuration.module';
+import { StartModule } from './modules/start/start.module';
+import { IntegrationModule } from './modules/integration/integration.module';
 
 @Module({
   imports: [
@@ -20,6 +22,8 @@ import { ConfigurationModule } from './modules/configuration/configuration.modul
       }),
     }),
     ConfigurationModule,
+    StartModule,
+    IntegrationModule,
   ],
   controllers: [],
   providers: [],
