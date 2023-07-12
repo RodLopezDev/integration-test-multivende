@@ -1,4 +1,11 @@
-import { Controller, Get, Post, Body, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Delete,
+  BadRequestException,
+} from '@nestjs/common';
 import { IntegrationService } from './integration.service';
 import { CreateIntegrationDto } from './dto/create-integration.dto';
 import { ApiTags } from '@nestjs/swagger';
@@ -12,7 +19,7 @@ export class IntegrationController {
   async create(@Body() createIntegrationDto: CreateIntegrationDto) {
     const data = await this.integrationService.findAll();
     if (!!data?.length) {
-      return data[0];
+      throw new BadRequestException('JUST_ONE_INTEGRATION');
     }
     return this.integrationService.create(createIntegrationDto);
   }

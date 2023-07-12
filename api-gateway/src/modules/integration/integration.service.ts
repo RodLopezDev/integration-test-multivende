@@ -30,8 +30,8 @@ export class IntegrationService {
 
   async findById(id: string) {
     const integration = await this.integrationModel.findById(id);
-    if (!integration) {
-      return null;
+    if (!!integration) {
+      return integration;
     }
     throw new NotFoundException(`Not found integration`);
   }
@@ -48,25 +48,31 @@ export class IntegrationService {
       if (!!newIntegration.matchedCount) {
         return dto.toJSON();
       }
-      return null;
+      throw new InternalServerErrorException('NOT_UPDATED');
     } catch (e) {
       throw new InternalServerErrorException(e?.message);
     }
   }
 
-  async updateTokens(dto: Integration, token: string, refreshToken: string) {
+  async updateTokens(
+    dto: Integration,
+    clientToken: string,
+    clientRefreshToken: string,
+  ) {
     const integration = await this.findById(dto.id);
     try {
-      const newIntegration = await integration.updateOne(
-        { ...dto.toJSON(), token, refreshToken },
-        {
-          new: true,
-        },
-      );
+      const payload = {
+        ...dto.toJSON(),
+        clientToken,
+        clientRefreshToken,
+      };
+      const newIntegration = await integration.updateOne(payload, {
+        new: true,
+      });
       if (!!newIntegration.matchedCount) {
-        return dto.toJSON();
+        return payload;
       }
-      return null;
+      throw new InternalServerErrorException('NOT_UPDATED');
     } catch (e) {
       throw new InternalServerErrorException(e?.message);
     }

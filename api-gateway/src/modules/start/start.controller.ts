@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import { ConfigService } from '@nestjs/config';
-import { Get, Controller, Res } from '@nestjs/common';
+import { Get, Controller, Res, NotFoundException } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { IntegrationService } from '../integration/integration.service';
@@ -23,7 +23,7 @@ export class StartController {
     const value = this.configService.get<string>('multivende.url');
     const integrations = await this.integrationService.findAll();
     if (!integrations) {
-      return res.redirect('');
+      throw new NotFoundException('INTEGRATION_NOT_FOUND');
     }
     const integration = integrations?.[0];
 

@@ -7,6 +7,7 @@ import { getEnvironmentVars } from './app/Environment';
 import { ConfigurationModule } from './modules/configuration/configuration.module';
 import { StartModule } from './modules/start/start.module';
 import { IntegrationModule } from './modules/integration/integration.module';
+import { MultivendeModule } from './modules/multivende/multivende.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { IntegrationModule } from './modules/integration/integration.module';
     ConfigurationModule,
     StartModule,
     IntegrationModule,
+    MultivendeModule,
   ],
   controllers: [],
   providers: [],
