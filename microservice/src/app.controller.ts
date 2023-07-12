@@ -1,15 +1,9 @@
-import {
-  Inject,
-  Logger,
-  Controller,
-  BadRequestException,
-} from '@nestjs/common';
+import { Inject, Controller, BadRequestException } from '@nestjs/common';
 import { ClientKafka, MessagePattern, Payload } from '@nestjs/microservices';
 
 import {
   KAFKA_INFO_TOPIC,
   TOTAL_BULK_UPDATE,
-  OFFSET_BULK_UPDATE,
   KAFKA_INSTANCE_NAME,
   KAFKA_BULK_INIT_TOPIC,
   KAFKA_WAREHOUSE_TOPIC,
@@ -98,6 +92,7 @@ export class AppController {
       clientToken,
       merchant.MerchantId,
     );
+
     if (!warehouse) {
       return { state: 'WAREHOUSE_NOT_FOUND', data: null };
     }
@@ -114,7 +109,9 @@ export class AppController {
       bulkId,
       token: clientToken,
     };
+
     this.client.emit(KAFKA_INTERN_TOPIC_BULK_NODE, dto);
+
     return { state: 'CREATED', data: bulkCreated.toJSON() };
   }
 }

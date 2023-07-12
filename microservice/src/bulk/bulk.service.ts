@@ -53,23 +53,18 @@ export class BulkService {
     return null;
   }
 
-  async update(bulkId: string, state: string, current: number) {
-    const integration = await this.findById(bulkId);
-    if (!integration) {
-      return null;
-    }
-
+  async update(bulk: Bulk, state: string, current: number) {
     try {
       const hasError = false;
       const updatedAt = new Date();
-      const newIntegration = await integration.updateOne(
+      const newIntegration = await bulk.updateOne(
         { state, current, updatedAt, hasError },
         {
           new: true,
         },
       );
       if (!!newIntegration.matchedCount) {
-        return { ...integration.toJSON(), state, current, updatedAt, hasError };
+        return { ...bulk.toJSON(), state, current, updatedAt, hasError };
       }
       throw new InternalServerErrorException('NOT_UPDATED');
     } catch (e) {
@@ -78,23 +73,22 @@ export class BulkService {
   }
 
   async updateError(
-    bulkId: string,
+    bulk: Bulk,
     hasError: boolean,
     errorType: string,
     retries: number,
   ) {
-    const integration = await this.findById(bulkId);
     try {
       const updatedAt = new Date();
-      const newIntegration = await integration.updateOne(
-        { ...integration.toJSON(), hasError, errorType, retries, updatedAt },
+      const newIntegration = await bulk.updateOne(
+        { ...bulk.toJSON(), hasError, errorType, retries, updatedAt },
         {
           new: true,
         },
       );
       if (!!newIntegration.matchedCount) {
         return {
-          ...integration.toJSON(),
+          ...bulk.toJSON(),
           hasError,
           errorType,
           retries,

@@ -12,8 +12,6 @@ export class MultivendeService {
     const headers = {
       Authorization: `bearer ${token}`,
     };
-    console.log(url);
-    console.log(headers);
     const { data } = await axios.get(`${baseUrl}/api/d/info`, {
       headers,
     });
