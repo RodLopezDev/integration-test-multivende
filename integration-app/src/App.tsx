@@ -1,47 +1,26 @@
-import { useEffect, useState } from "react";
-import viteLogo from "/vite.svg";
-import "./App.css";
-import IntegrationRepository from "./modules/integration/infraestructure/IntegrationRepository";
-import Environment from "./app/config/Environment";
+import { Box, CircularProgress } from "@mui/material";
+
+import useGetIntegration from "./modules/integration/hooks/useGetIntegration";
+
+import NewIntegrationForm from "./components/NewIntegrationForm";
+import IntegrationView from "./components/IntegrationView";
 
 function App() {
-  const [count, setCount] = useState({});
-
-  useEffect(() => {
-    const repository = new IntegrationRepository();
-    console.log(1);
-    repository
-      .getIntegration()
-      .then((result) => {
-        setCount(result);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  }, []);
-
-  return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        count is {JSON.stringify(count)}
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-      <form action={`${Environment.apiUrl}/start`} method="get">
-        <button>Connect</button>
-      </form>
-    </>
-  );
+  const { isFetching, error, integration, reload } = useGetIntegration();
+  if (isFetching) {
+    return (
+      <Box>
+        <CircularProgress color="primary" />
+      </Box>
+    );
+  }
+  if (error) {
+    return <div>Error getting data, check deployment</div>;
+  }
+  if (!integration) {
+    return <NewIntegrationForm reload={reload} />;
+  }
+  return <IntegrationView reload={reload} integration={integration} />;
 }
 
 export default App;
