@@ -101,18 +101,4 @@ export class MultivendeController {
     );
     return warehouseInfo;
   }
-
-  @Post('prices')
-  async getPrices() {
-    const runnable = new RetryablePromiseEvent(this);
-    const merchanInfo = await runnable.run<any>((token) => {
-      console.log(token, 'merchanInfo');
-      return this.multivendeService.getInfo(token);
-    });
-    const pricesInfo = await runnable.run<string>((token) => {
-      console.log(token, 'pricesInfo');
-      return this.multivendeService.getPrices(token, merchanInfo.MerchantId);
-    });
-    return pricesInfo;
-  }
 }

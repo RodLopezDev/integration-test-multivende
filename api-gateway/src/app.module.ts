@@ -8,6 +8,7 @@ import { ConfigurationModule } from './modules/configuration/configuration.modul
 import { StartModule } from './modules/start/start.module';
 import { IntegrationModule } from './modules/integration/integration.module';
 import { MultivendeModule } from './modules/multivende/multivende.module';
+import { KafkaModule } from './modules/kafka/kafka.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { MultivendeModule } from './modules/multivende/multivende.module';
     StartModule,
     IntegrationModule,
     MultivendeModule,
+    KafkaModule,
   ],
   controllers: [],
   providers: [],
