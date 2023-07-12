@@ -36,7 +36,7 @@ class IntegrationRepository {
     return Boolean(result.data);
   }
   async auth(): Promise<boolean> {
-    const result = await axios.post<any>(`${Environment.apiUrl}/multivende`);
+    const result = await axios.post<any>(`${Environment.apiUrl}/multivende/token`);
     if (!result?.data) {
       throw new Error("DATA_NOT_FOUND");
     }

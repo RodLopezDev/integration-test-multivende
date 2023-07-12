@@ -12,17 +12,17 @@ export class AppService {
   ) {}
 
   async validateTransaction(transaction: TransactionRequestDto) {
-    try {
-      const { name } = transaction;
-      console.log(name, 'MESSAGE CONTENT');
-      const transactionResponseDto: TransactionResponseDto = {
-        value: name.includes('MY_NAME') ? 'OK' : 'ERROR',
-      };
-      const message = JSON.stringify(transactionResponseDto);
-      this.kafkaService.emit(KAFKA_RESPONSE_TOPIC, message);
-      Logger.log('MESSAGE SENDED ON KAFKA_REQUEST_TOPIC TOPIC');
-    } catch (e) {
-      Logger.error(e);
-    }
+    // try {
+    //   const { name } = transaction;
+    //   console.log(name, 'MESSAGE CONTENT');
+    //   const transactionResponseDto: TransactionResponseDto = {
+    //     value: name.includes('MY_NAME') ? 'OK' : 'ERROR',
+    //   };
+    //   const message = JSON.stringify(transactionResponseDto);
+    //   this.kafkaService.emit(KAFKA_RESPONSE_TOPIC, message);
+    //   Logger.log('MESSAGE SENDED ON KAFKA_REQUEST_TOPIC TOPIC');
+    // } catch (e) {
+    //   Logger.error(e);
+    // }
   }
 }

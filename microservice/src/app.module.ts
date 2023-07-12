@@ -5,6 +5,8 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { AppService } from './app.service';
 import { AppController } from './app.controller';
 import { getEnvironmentVars } from './app/Environment';
+
+import { MultivendeModule } from './multivende/multivende.module';
 import { KAFKA_CONSUMER_GROUP_ID, KAFKA_INSTANCE_NAME } from './app/Constants';
 
 @Module({
@@ -34,6 +36,7 @@ import { KAFKA_CONSUMER_GROUP_ID, KAFKA_INSTANCE_NAME } from './app/Constants';
         inject: [ConfigService],
       },
     ]),
+    MultivendeModule,
   ],
   controllers: [AppController],
   providers: [AppService],

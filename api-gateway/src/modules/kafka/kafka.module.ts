@@ -8,10 +8,12 @@ import {
   KAFKA_CONSUMER_GROUP_ID,
   KAFKA_CONSUMER_CLIENTID,
 } from 'src/app/Constants';
+import { IntegrationModule } from '../integration/integration.module';
 
 @Module({
   imports: [
     ConfigModule,
+    IntegrationModule,
     ClientsModule.registerAsync([
       {
         name: KAFKA_INSTANCE_NAME,

@@ -8,15 +8,12 @@ import {
 
 import { MultivendeAuthService } from './multivende.auth.service';
 import { IntegrationService } from '../integration/integration.service';
-import { RetryablePromiseEvent } from './application/RetryblePromise';
-import { MultivendeService } from './multivende.service';
 
 @ApiTags('Multivende')
 @Controller('multivende')
 export class MultivendeController {
   constructor(
     private readonly multivendeAuthService: MultivendeAuthService,
-    private readonly multivendeService: MultivendeService,
     private readonly integrationService: IntegrationService,
   ) {}
 
@@ -35,7 +32,7 @@ export class MultivendeController {
     return integration;
   }
 
-  @Post()
+  @Post('token')
   async token() {
     const integrations = await this.integrationService.findAll();
     if (!integrations.length) {
@@ -79,26 +76,5 @@ export class MultivendeController {
       result.refreshToken,
     );
     return updated;
-  }
-
-  @Post('info')
-  async getInfo() {
-    const runnable = new RetryablePromiseEvent(this);
-    const result = await runnable.run<string>((token) => {
-      return this.multivendeService.getInfo(token);
-    });
-    return result;
-  }
-
-  @Post('warehouse')
-  async getWarehouse() {
-    const runnable = new RetryablePromiseEvent(this);
-    const merchanInfo = await runnable.run<any>((token) => {
-      return this.multivendeService.getInfo(token);
-    });
-    const warehouseInfo = await runnable.run<string>((token) =>
-      this.multivendeService.getWarehouse(token, merchanInfo.MerchantId),
-    );
-    return warehouseInfo;
   }
 }

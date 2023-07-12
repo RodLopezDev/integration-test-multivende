@@ -8,10 +8,14 @@ export class MultivendeService {
 
   async getInfo(token: string) {
     const baseUrl = this.configService.get<string>('multivende.url');
+    const url = `${baseUrl}/api/d/info`;
+    const headers = {
+      Authorization: `bearer ${token}`,
+    };
+    console.log(url);
+    console.log(headers);
     const { data } = await axios.get(`${baseUrl}/api/d/info`, {
-      headers: {
-        Authorization: `bearer ${token}`,
-      },
+      headers,
     });
     return data;
   }
