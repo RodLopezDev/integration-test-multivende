@@ -10,7 +10,7 @@
 - Finalmente la tabla Detalle-despacho permite asignar a grupos de productos asociados en la compra con un despacho registrado
   previamente o que se acaba de registrar.
 
-<img width="872" alt="image" src="https://github.com/RodLopezDev/integration-test-multivende/assets/83994234/4a3a2452-0d39-4820-82b5-7ce6be6a766d">
+<img width="872" alt="image" src="https://github.com/RodLopezDev/integration-test-multivende/assets/83994234/a24aea80-04db-43cc-b28c-9dcbf1b2cb95">
 
 ## Ejemplo en postgresql
 
