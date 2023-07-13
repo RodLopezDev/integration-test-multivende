@@ -1,10 +1,59 @@
-# Run
+# Desplegar localmente (Por separado)
 
+## Correr Kafka-Arch
+
+Primero desplegar los componentes de kafka
+
+```
+docker-compose -f docker-compose-kafka.yml up --build -d
+```
+
+## Correr MongoDb
+
+Ejecutar la imagen de mongo
+
+```
 docker run --name my-mongodb -p 27017:27017 -d mongo:latest
+```
 
-docker build -t multivende-front-app . 
+## Envs
 
-docker run --name container-x -p 4000:4000 --env-file .env -d multivende-front-app
+En los proyectos, puedes duplicar .env.local.example a .env para ejecutar el
+proyecto localmente
 
-# run bash
-docker exec -it 2b3b31ff4b7391f6880ce53f3ffcbc2d7c230b3a1f67da7979928825515662df /bin/sh
+## Para api-gateway
+
+Instalar las dependencias y luego correr en modo dev
+
+```
+cd ./api-gateway
+
+npm install
+npm run start:dev
+```
+
+Esto levatará el proyecto en el puerto 3000
+
+## Para microservice
+
+Instalar las dependencias y luego correr en modo dev
+
+```
+cd ./microservice
+
+npm install
+npm run start:dev
+```
+
+## Para integration-app (React)
+
+Instalar las dependencias y luego correr en modo dev
+
+```
+cd ./integration-app
+
+npm install
+npm run dev
+```
+
+Esto levatará el proyecto en el puerto 4173
