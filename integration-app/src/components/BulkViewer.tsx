@@ -8,7 +8,7 @@ interface Props {
 }
 
 const BulkViewer: FC<Props> = ({ disabled }) => {
-  const { bulk, load, isFetching, error } = useBulk();
+  const { bulk, load, isFetching } = useBulk();
   if (bulk) {
     return <BulkProgressView bulk={bulk} />;
   }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import BulkRepository from "../infraestructure/BulkRepository";
 import Bulk from "../domain/entity/Bulk";
 

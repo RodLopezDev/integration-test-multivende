@@ -1,7 +1,7 @@
 import axios from "axios";
 import Bulk from "../domain/entity/Bulk";
 import Environment from "../../../app/config/Environment";
-import { MapBulk } from "../domain/mapper/Bulk.mapper";
+import { MapBulk } from "../domain/mapper/bulk.mapper";
 
 class BulkRepository {
   async bulk(): Promise<Bulk> {
