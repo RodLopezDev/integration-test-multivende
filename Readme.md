@@ -1,9 +1,37 @@
 # Multivende - Implementation Test :rocket:
 
+
+# Diagrama de Instalación de App
+
+```mermaid
+sequenceDiagram
+autonumber
+    actor user
+    participant frontApp
+
+    Note over user,apiGateway: Instalación app
+    
+    user->>frontApp: Ingresa credenciales
+    frontApp-->>apiGateway: Redirige a /start
+    apiGateway-->>multivendeApp: Redirige a /apps
+    user-->>multivendeApp: Autoriza instalación
+    multivendeApp-->>apiGateway: Retorna 'code'
+    apiGateway-->>mongodb: Persiste datos
+    apiGateway-->>frontApp: Informa exito
+
+    Note over user,mongodb: Auth app
+    user->>frontApp: Solicita auth
+    frontApp-->>apiGateway: Request a /auth
+    apiGateway-->>multivendeApp: Request a /oauth/token
+    apiGateway-->>mongodb: Persiste datos
+    apiGateway-->>frontApp: Informa exito
+```
+
 # Diagrama de Arquitectura
 
 ```mermaid
 sequenceDiagram
+    autonumber
     participant integrationApp
     participant apiGateway
     participant kafka
