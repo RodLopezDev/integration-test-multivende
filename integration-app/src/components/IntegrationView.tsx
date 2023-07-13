@@ -20,6 +20,8 @@ import CircleIcon from "@mui/icons-material/Circle";
 import InboxIcon from "@mui/icons-material/Inbox";
 import Environment from "../app/config/Environment";
 import IntegrationRepository from "../modules/integration/infraestructure/IntegrationRepository";
+import Swal from "sweetalert2";
+import BulkViewer from "./BulkViewer";
 
 interface Props {
   reload: () => void;
@@ -29,7 +31,7 @@ const IntegrationView: FC<Props> = ({ integration, reload }) => {
   const [disabled, setDisabled] = useState(false);
   const repository = new IntegrationRepository();
 
-  const handleRemove = async () => {
+  const $handleRemove = async () => {
     setDisabled(true);
     try {
       await repository.remove();
@@ -37,6 +39,20 @@ const IntegrationView: FC<Props> = ({ integration, reload }) => {
       console.error(e);
     }
     reload();
+  };
+
+  const handleRemove = async () => {
+    await Swal.fire({
+      title: "Remove integration",
+      text: "Are you shure?",
+      icon: "question",
+      showDenyButton: true,
+      confirmButtonText: "Yes",
+      denyButtonText: "No",
+      preConfirm: async () => {
+        await $handleRemove();
+      },
+    });
   };
 
   const handleAuth = async () => {
@@ -49,6 +65,10 @@ const IntegrationView: FC<Props> = ({ integration, reload }) => {
     reload();
   };
 
+  const disabledConnect =
+    !!integration.clientCode || !!integration.clientToken.length || disabled;
+  const disabledAuth =
+    !integration.clientCode || !!integration.clientToken.length || disabled;
   return (
     <Card elevation={0}>
       <CardContent>
@@ -123,23 +143,30 @@ const IntegrationView: FC<Props> = ({ integration, reload }) => {
           <Divider />
           <Box height={(t) => t.spacing(2)} />
           <Grid container spacing={1}>
+            {disabledAuth && (
+              <Grid item xs={12}>
+                <BulkViewer disabled={disabled} />
+              </Grid>
+            )}{" "}
             <Grid item xs={4}>
-              <a href={`${Environment.apiUrl}/start`}>
-                <Button variant="outlined" fullWidth disabled={disabled}>
+              {disabledConnect ? (
+                <Button variant="outlined" fullWidth disabled={true}>
                   Connect
                 </Button>
-              </a>
+              ) : (
+                <a href={`${Environment.apiUrl}/start`}>
+                  <Button variant="outlined" fullWidth>
+                    Connect
+                  </Button>
+                </a>
+              )}
             </Grid>
             <Grid item xs={4}>
               <Button
                 variant="outlined"
                 fullWidth
                 onClick={handleAuth}
-                disabled={
-                  !integration.clientCode ||
-                  !!integration.clientToken.length ||
-                  disabled
-                }
+                disabled={disabledAuth}
               >
                 {integration.clientToken ? "Authorized" : "Auth"}
               </Button>

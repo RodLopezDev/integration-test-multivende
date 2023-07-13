@@ -9,7 +9,7 @@ const MainContainer: FC<PropsWithChildren> = ({ children }) => {
       sx={(theme) => ({
         display: "grid",
         placeItems: "center center",
-        backgroundColor: theme.palette.grey[100],
+        backgroundColor: theme.palette.grey[900],
       })}
     >
       {children}

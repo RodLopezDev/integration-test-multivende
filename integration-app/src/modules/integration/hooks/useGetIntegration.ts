@@ -2,7 +2,13 @@ import { useEffect, useState } from "react";
 import IntegrationRepository from "../infraestructure/IntegrationRepository";
 import Integration from "../domain/entity/Integration";
 
-const useGetIntegration = () => {
+type State = {
+  integration: Integration | null;
+  isFetching: boolean;
+  error: boolean;
+};
+
+const useGetIntegration = (): State & { reload: () => void } => {
   const [state, setstate] = useState<{
     integration: Integration | null;
     isFetching: boolean;
