@@ -1,7 +1,36 @@
 # Multivende - Implementation Test :rocket:
 
+- [Descripción](#Descripción)
+- [Instalación](#Instalación)
+- [Diagrama de Instación de App](#Diagrama_de_Instalación_de_App)
+- [Diagrama de Arquitectura](#Diagrama_de_Arquitectura)
+
+# Descripción
+
+La solución permite conectarnos a los servicos API de multivende mediante un app
+que debe ser instalada en la cuenta del usuario.
+La solución incluye.
+
+- MongoDb: Base de datos.
+- NestJS (Backend): Funciona como backend y apiGateway entre internet y los microservicios
+- NestJS (Microservice): Microservicio que implementa una conexión Kafka para la comunicación
+- ReactApp (Frontend): Web App para la interación con el backend.
+- confluentinc/cp-kafka: Kafka server.
+- provectuslabs/kafka-ui: Web app para administración y GUI de kafka.
+
+# Instalación
+
+- [Instalación en local](./docs/local-deploy.md)!
+- [Despliegue con Docker](./docs/docker.md)!
+- [Capturas](./docs/software-description.md)!
 
 # Diagrama de Instalación de App
+
+Instalación de la app en la plataforma de multivende:
+
+- Primero se ingresa las credenciales del app.
+- Se debe autorizar el app mediante la plataforma multivende.
+- Esto genera un code que luego se ocupará para generar un token de autenticación.
 
 ```mermaid
 sequenceDiagram
@@ -10,7 +39,7 @@ autonumber
     participant frontApp
 
     Note over user,apiGateway: Instalación app
-    
+
     user->>frontApp: Ingresa credenciales
     frontApp-->>apiGateway: Redirige a /start
     apiGateway-->>multivendeApp: Redirige a /apps
@@ -28,6 +57,8 @@ autonumber
 ```
 
 # Diagrama de Arquitectura
+
+El software incluye una implementación de un apiGateway (backend) que se comunica con el microservicio mediante TRANSPORT.KAFKA.
 
 ```mermaid
 sequenceDiagram
@@ -68,12 +99,3 @@ sequenceDiagram
 
     Note over kafka,mongodb: Event/Sourcing Process
 ```
-
-<img width="1027" alt="image" src="https://github.com/RodLopezDev/integration-test-multivende/assets/83994234/a8625e7d-8f33-4a39-a64c-55d769e51a7b">
-
-<img width="697" alt="image" src="https://github.com/RodLopezDev/integration-test-multivende/assets/83994234/be7ad249-c81a-49e2-ac0e-5ae1f0a858b2">
-
-<img width="1424" alt="image" src="https://github.com/RodLopezDev/integration-test-multivende/assets/83994234/26ff2e37-7894-4863-95a6-e4d6b60e8f04">
-
-
-<img width="1417" alt="image" src="https://github.com/RodLopezDev/integration-test-multivende/assets/83994234/9757cb29-80cc-4c81-9c8f-d040bdc6ac3b">
