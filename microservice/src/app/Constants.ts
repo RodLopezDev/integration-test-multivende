@@ -10,5 +10,5 @@ export const KAFKA_INTERN_TOPIC_BULK_AUTH = 'microservice-bulk-auth';
 export const KAFKA_INSTANCE_NAME = 'example-name';
 export const KAFKA_CONSUMER_GROUP_ID = 'microservice-consumer';
 
-export const OFFSET_BULK_UPDATE = 5;
-export const TOTAL_BULK_UPDATE = 20000;
+export const OFFSET_BULK_UPDATE = 20;
+export const TOTAL_BULK_UPDATE = 10000;

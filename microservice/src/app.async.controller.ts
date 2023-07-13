@@ -31,10 +31,11 @@ export class AppAsyncController {
     itemsCount: number,
   ): Promise<[boolean, string]> {
     try {
-      const result = await this.multivendeService.bulkUpdate(
+      const products = new Array(itemsCount).fill({ code: '', amount: 10 });
+      await this.multivendeService.bulkUpdate(
         token,
         bulk.warehouseId,
-        [],
+        products,
       );
       return [true, ''];
     } catch (e) {

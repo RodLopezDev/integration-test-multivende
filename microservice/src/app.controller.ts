@@ -8,8 +8,8 @@ import {
   KAFKA_BULK_INIT_TOPIC,
   KAFKA_WAREHOUSE_TOPIC,
   KAFKA_BULK_STATUS_TOPIC,
-  KAFKA_INTERN_TOPIC_BULK_NODE,
   KAFKA_BULK_STATUS_TOPIC_ID,
+  KAFKA_INTERN_TOPIC_BULK_NODE,
 } from './app/Constants';
 
 import { BulkService } from './bulk/bulk.service';
@@ -41,9 +41,10 @@ export class AppController {
   async infoTransaction(@Payload() message: IntegrationDto): Promise<any> {
     const clientToken = this.getToken(message);
     try {
-      return await this.multivendeService.getInfo(clientToken);
+      const info = await this.multivendeService.getInfo(clientToken);
+      return { status: 'OK', message: '', data: info };
     } catch (e) {
-      return { status: 'ERROR', message: e?.message };
+      return { status: 'ERROR', message: e?.message, data: null };
     }
   }
 
@@ -52,12 +53,13 @@ export class AppController {
     const clientToken = this.getToken(message);
     try {
       const merchant = await this.multivendeService.getInfo(clientToken);
-      return await this.multivendeService.getWarehouse(
+      const warehouse = await this.multivendeService.getWarehouse(
         clientToken,
         merchant.MerchantId,
       );
+      return { status: 'OK', message: '', data: warehouse };
     } catch (e) {
-      return { status: 'ERROR', message: e?.message };
+      return { status: 'ERROR', message: e?.message, data: null };
     }
   }
 
@@ -65,18 +67,18 @@ export class AppController {
   async bulkStateTransaction(): Promise<any> {
     const bulk = await this.bulkService.findActive();
     if (bulk) {
-      return { state: 'ACTIVE', data: bulk.toJSON() };
+      return { status: 'OK', message: '', data: bulk.toJSON() };
     }
-    return { state: 'NOT_FOUND_ACTIVE_BULK', data: null };
+    return { status: 'ERROR', message: 'NOT_FOUND', data: null };
   }
 
   @MessagePattern(KAFKA_BULK_STATUS_TOPIC_ID)
   async bulkStateTransactionId(@Payload() bulkId: string): Promise<any> {
     const bulk = await this.bulkService.findById(bulkId);
     if (bulk) {
-      return { state: 'ACTIVE', data: bulk.toJSON() };
+      return { status: 'OK', message: '', data: bulk.toJSON() };
     }
-    return { state: 'NOT_FOUND_ACTIVE_BULK', data: null };
+    return { status: 'ERROR', message: 'NOT_FOUND', data: null };
   }
 
   @MessagePattern(KAFKA_BULK_INIT_TOPIC)
@@ -84,7 +86,11 @@ export class AppController {
     const clientToken = this.getToken(message);
     const bulk = await this.bulkService.findActive();
     if (bulk) {
-      return { state: 'BULK_RUNNING_AGAIN', data: bulk.toJSON() };
+      return {
+        status: 'OK',
+        message: 'BULK_RUNNING_YET',
+        data: bulk.toJSON(),
+      };
     }
 
     const merchant = await this.multivendeService.getInfo(clientToken);
@@ -94,7 +100,7 @@ export class AppController {
     );
 
     if (!warehouse) {
-      return { state: 'WAREHOUSE_NOT_FOUND', data: null };
+      return { status: 'ERROR', message: 'WAREHOUSE_NOT_FOUND', data: null };
     }
 
     const bulkCreated = await this.bulkService.create(
@@ -112,6 +118,10 @@ export class AppController {
 
     this.client.emit(KAFKA_INTERN_TOPIC_BULK_NODE, dto);
 
-    return { state: 'CREATED', data: bulkCreated.toJSON() };
+    return {
+      status: 'OK',
+      message: 'CREATED',
+      data: bulkCreated.toJSON(),
+    };
   }
 }
