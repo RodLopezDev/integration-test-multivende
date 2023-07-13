@@ -2,7 +2,7 @@
 
 <img width="1027" alt="image" src="https://github.com/RodLopezDev/integration-test-multivende/assets/83994234/a8625e7d-8f33-4a39-a64c-55d769e51a7b">
 
-# Docker orchestation
+# Docker orchestration
 
 <img width="697" alt="image" src="https://github.com/RodLopezDev/integration-test-multivende/assets/83994234/be7ad249-c81a-49e2-ac0e-5ae1f0a858b2">
 

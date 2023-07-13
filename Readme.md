@@ -23,6 +23,7 @@ La solución incluye.
 - [Instalación en local](./docs/local-deploy.md)!
 - [Despliegue con Docker](./docs/docker.md)!
 - [Capturas](./docs/software-description.md)!
+- [Otros ejercicios](./_otros-ejercicios)!
 
 # Diagrama de Instalación de App
 

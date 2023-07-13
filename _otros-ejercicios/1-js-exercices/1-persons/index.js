@@ -10,7 +10,9 @@ personsWithAddress.sort((a, b) => (a.name > b.name ? 1 : -1));
 
 // /** FILTER AGE */
 const finalValue = personsWithAddress
+  // FILTER 1
   .filter((person) => person.age > 20 && person.age < 30)
+  // FILTER 2
   .filter((person) => {
     const firstCharOnName = person.name[0];
     return ["H", "L"].includes(firstCharOnName.toUpperCase());
