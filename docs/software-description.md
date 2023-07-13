@@ -4,7 +4,7 @@
 
 # Docker orchestration
 
-<img width="697" alt="image" src="https://github.com/RodLopezDev/integration-test-multivende/assets/83994234/be7ad249-c81a-49e2-ac0e-5ae1f0a858b2">
+<img width="666" alt="image" src="https://github.com/RodLopezDev/integration-test-multivende/assets/83994234/da62435c-7ff6-4674-8b2d-98ab827b02bb">
 
 # Swagger api-gateway project
 
